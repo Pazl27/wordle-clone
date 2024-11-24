@@ -2,7 +2,7 @@ use actix_web::{App, HttpServer};
 use dotenv::dotenv;
 
 mod router;
-mod word_provider;
+pub mod word_provider;
 mod database;
 
 #[actix_web::main]

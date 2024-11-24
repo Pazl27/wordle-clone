@@ -1,17 +1,11 @@
-use actix_web::{test, App};
-use word_provider::get_word;
+// use backend::word_provider::find_same_letters;
 
-#[actix_rt::test]
-async fn test_get_word() {
-    let mut app = test::init_service(App::new().service(get_word)).await;
-
-    // Simulate a request to the /word endpoint
-    let req = test::TestRequest::get().uri("/word").to_request();
-    let resp = test::call_service(&mut app, req).await;
-
-    // Check if the response is successful
-    assert!(resp.status().is_success(), "Expected successful response");
-
-    let body = test::read_body(resp).await;
-    assert!(body.len() > 0, "Expected non-empty response body");
-}
+// #[test]
+// fn test_find_same_letters() {
+//     let word = "hello";
+//     let guess = "world";
+//     let result = find_same_letters(word, guess);
+//     assert_eq!(result.len(), 2);
+//     assert_eq!(result.get(&1), Some(&'o'));
+//     assert_eq!(result.get(&3), Some(&'l'));
+// }

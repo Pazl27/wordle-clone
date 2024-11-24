@@ -2,9 +2,10 @@ use actix_web::{get, post, HttpResponse, Responder};
 use actix_web::web;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use std::collections::HashMap;
 
-use crate::word_provider::{get_word, is_word_in_list};
-use crate::database::{establish_connection, create_user};
+use crate::word_provider::{get_word, is_word_in_list, find_same_letters, find_right_place };
+use crate::database::{establish_connection, create_user, get_user};
 
 #[derive(Serialize)]
 pub enum Valid {
@@ -14,14 +15,15 @@ pub enum Valid {
 
 #[derive(Deserialize)]
 struct GuessDTO {
+    id: Uuid,
     guess: String,
 }
 
 #[derive(Serialize)]
 struct GuessResponseDTO {
-    correct: Valid,
-    in_word: Vec<String>,
-    right_place: Vec<String>,
+    valid_word: Valid,
+    in_word: HashMap<i8, char>,
+    right_place: HashMap<i8, char>,
 }
 
 #[derive(Serialize)]
@@ -53,15 +55,39 @@ async fn start_game() -> impl Responder {
 
 #[get("/guess")]
 async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
+    let pool = establish_connection().await.unwrap();
+    let user = get_user(&pool, dto.id).await.unwrap();
     let guess = dto.guess.clone();
 
     let valid = is_word_in_list(&guess);
 
+    match valid {
+        Valid::Fail => {
+            let response = GuessResponseDTO {
+                valid_word: valid,
+                in_word: HashMap::new(),
+                right_place: HashMap::new(),
+            };
+            return HttpResponse::Ok().json(response);
+        }
+        _ => {}
+    }
+
+    let word = user.word;
+
+    let contains_letters = find_same_letters(&word, &guess);
+    let right_letters = find_right_place(&word, &guess);
+
     let response = GuessResponseDTO {
-        correct: valid,
-        in_word: vec![],
-        right_place: vec![],
+        valid_word: valid,
+        in_word: contains_letters,
+        right_place: right_letters,
     };
 
     HttpResponse::Ok().json(response)
 }
+
+/* c u e
+*
+*/
+

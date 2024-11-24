@@ -2,8 +2,7 @@ use sqlx::postgres::PgPoolOptions;
 use std::env;
 use uuid::Uuid;
 
-#[derive(sqlx::FromRow)]
-pub struct User {
+#[derive(sqlx::FromRow)] pub struct User {
     pub id: Uuid,
     pub attempts: i32,
     pub word: String,
@@ -25,6 +24,18 @@ pub async fn create_user(pool: &sqlx::PgPool, word: &str) -> sqlx::Result<User> 
         new_id,
         word,
         0
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(user)
+}
+
+pub async fn get_user(pool: &sqlx::PgPool, id: Uuid) -> sqlx::Result<User> {
+    let user = sqlx::query_as!(
+        User,
+        "SELECT id, word, attempts FROM users WHERE id = $1",
+        id
     )
     .fetch_one(pool)
     .await?;

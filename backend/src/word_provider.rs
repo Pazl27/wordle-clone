@@ -2,6 +2,7 @@ use rand::Rng;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use std::collections::HashMap;
 
 use crate::router::Valid;
 
@@ -35,3 +36,28 @@ pub fn is_word_in_list(word: &str) -> Valid {
         Valid::Fail
     }
 }
+
+pub fn find_same_letters(word: &str, guess: &str) -> HashMap<i8, char> {
+    let mut map = HashMap::new();
+
+    for (i, g_char) in guess.chars().enumerate() {
+        if word.contains(g_char) {
+            map.insert(i as i8, g_char);
+        }
+    }
+
+    map
+}
+
+pub fn find_right_place(word: &str, guess: &str) -> HashMap<i8, char> {
+    let mut map = HashMap::new();
+
+    for (i, g_char) in guess.chars().enumerate() {
+        if word.chars().nth(i) == Some(g_char) {
+            map.insert(i as i8, g_char);
+        } 
+    }
+    map
+
+}
+
