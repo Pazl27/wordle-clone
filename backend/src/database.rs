@@ -4,8 +4,8 @@ use uuid::Uuid;
 
 #[derive(sqlx::FromRow)] pub struct User {
     pub id: Uuid,
-    pub attempts: i32,
     pub word: String,
+    pub attempts: i32,
 }
 
 pub async fn establish_connection() -> sqlx::Result<sqlx::PgPool> {
@@ -41,4 +41,18 @@ pub async fn get_user(pool: &sqlx::PgPool, id: Uuid) -> sqlx::Result<User> {
     .await?;
 
     Ok(user)
+}
+
+pub async fn update_user(pool: &sqlx::PgPool, user: &User) -> sqlx::Result<User> {
+    let updated_user = sqlx::query_as!(
+        User,
+        "UPDATE users SET word = $1, attempts = $2 WHERE id = $3 RETURNING id, word, attempts",
+        user.word,
+        user.attempts,
+        user.id
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(updated_user)
 }
