@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <h1>Users List</h1>
-    
+
     <div v-if="loading">Loading...</div>
-    
+
     <div v-if="error" style="color: red;">Error: {{ error }}</div>
 
     <div v-if="users.length > 0">
@@ -19,38 +19,47 @@
   </div>
 </template>
 
-<script>
-  import api from './api/backend-api';  
+<script lang="ts">
+  import { defineComponent, ref } from 'vue';
+  import api from './api/backend-api';
 
-  export default {
+  interface User {
+    id: number;
+    word: string;
+    attempts: number;
+  }
+
+  export default defineComponent({
     name: 'App',
-    data() {
-      return {
-        users: [],       
-        loading: false, 
-        error: null    
-      };
-    },
-    created() {
-      this.fetchUsers();
-    },
-    methods: {
-      async fetchUsers() {
-        this.loading = true;
-        this.error = null; 
+    setup() {
+      const users = ref<User[]>([]);
+      const loading = ref<boolean>(false);
+      const error = ref<string | null>(null);
+
+      const fetchUsers = async () => {
+        loading.value = true;
+        error.value = null;
 
         try {
-          const response = await api.getUsers();  
-          this.users = response.data;  
-          console.log(response.data); 
+          const response = await api.getUsers();
+          users.value = response.data;
+          console.log(response.data);
         } catch (err) {
-          this.error = 'Failed to fetch users: ' + err.message;  
+          error.value = 'Failed to fetch users: ' + (err instanceof Error ? err.message : 'Unknown error');
         } finally {
-          this.loading = false;  
+          loading.value = false;
         }
-      }
+      };
+
+      fetchUsers();
+
+      return {
+        users,
+        loading,
+        error
+      };
     }
-  };
+  });
 </script>
 
 <style scoped>

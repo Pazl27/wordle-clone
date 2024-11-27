@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { type AxiosResponse } from 'axios'
 
 const axiosApi = axios.create({
   baseURL: '/api',
@@ -10,7 +10,7 @@ export default {
   startGame() {
     return axiosApi.post('/start')
   },
-  guessWord(guess) {
+  guessWord(guess: any) {
     return axiosApi.post('/guess', guess)
   },
   getUsers() {
