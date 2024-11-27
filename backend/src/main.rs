@@ -12,6 +12,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(router::start_game)
             .service(router::guess)
+            .service(router::get_users)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

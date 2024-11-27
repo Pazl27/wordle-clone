@@ -33,7 +33,7 @@ struct UserDTO {
     attempts: i32,
 }
 
-#[post("/start")]
+#[post("/api/start")]
 async fn start_game() -> impl Responder {
     let pool = establish_connection().await.unwrap();
 
@@ -54,7 +54,7 @@ async fn start_game() -> impl Responder {
     }
 }
 
-#[get("/guess")]
+#[post("/api/guess")]
 async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     let pool = establish_connection().await.unwrap();
     let mut user = get_user(&pool, dto.id).await.unwrap();
@@ -91,4 +91,12 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     };
 
     HttpResponse::Ok().json(response)
+}
+
+#[get("/api/users")]
+async fn get_users() -> impl Responder {
+    let pool = establish_connection().await.unwrap();
+    let users = crate::database::get_users(&pool).await.unwrap();
+
+    HttpResponse::Ok().json(users)
 }

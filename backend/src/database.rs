@@ -1,7 +1,9 @@
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use uuid::Uuid;
+use serde::Serialize;
 
+#[derive(Serialize)]
 #[derive(sqlx::FromRow)] pub struct User {
     pub id: Uuid,
     pub word: String,
@@ -55,4 +57,15 @@ pub async fn update_user(pool: &sqlx::PgPool, user: &User) -> sqlx::Result<User>
     .await?;
 
     Ok(updated_user)
+}
+
+pub async fn get_users(pool: &sqlx::PgPool) -> sqlx::Result<Vec<User>> {
+    let users = sqlx::query_as!(
+        User,
+        "SELECT id, word, attempts FROM users"
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(users)
 }
