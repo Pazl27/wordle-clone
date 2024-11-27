@@ -1,7 +1,5 @@
 <template>
-  <div id="app">
-    <router-view></router-view>
-  </div>
+  PlayGame
 </template>
 
 <script lang="ts">
@@ -9,4 +7,3 @@
 
 <style scoped>
 </style>
-
