@@ -37,6 +37,14 @@ pub fn is_word_in_list(word: &str) -> Valid {
     }
 }
 
+pub fn is_right_word(word: &str, guess: &str) -> Valid {
+    if word == guess {
+        Valid::Pass
+    } else {
+        Valid::Fail
+    }
+}
+
 pub fn find_same_letters(word: &str, guess: &str) -> HashMap<i8, char> {
     let mut map = HashMap::new();
 

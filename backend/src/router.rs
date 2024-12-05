@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::collections::HashMap;
 
-use crate::word_provider::{get_word, is_word_in_list, find_same_letters, find_right_place };
+use crate::word_provider::{get_word, is_word_in_list, find_same_letters, find_right_place, is_right_word }; 
 use crate::database::{establish_connection, create_user, get_user, update_user};
 
 #[derive(Serialize)]
@@ -22,6 +22,7 @@ struct GuessDTO {
 #[derive(Serialize)]
 struct GuessResponseDTO {
     valid_word: Valid,
+    correct_word: Valid,
     in_word: HashMap<i8, char>,
     right_place: HashMap<i8, char>,
     attempts: i32,
@@ -61,11 +62,13 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     let guess = dto.guess.clone();
 
     let valid = is_word_in_list(&guess);
+    let correct = is_right_word(&user.word, &guess);
 
     match valid {
         Valid::Fail => {
             let response = GuessResponseDTO {
                 valid_word: valid,
+                correct_word: correct,
                 in_word: HashMap::new(),
                 right_place: HashMap::new(),
                 attempts: user.attempts,
@@ -85,6 +88,7 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
 
     let response = GuessResponseDTO {
         valid_word: valid,
+        correct_word: correct,
         in_word: contains_letters,
         right_place: right_letters,
         attempts: user.attempts,
