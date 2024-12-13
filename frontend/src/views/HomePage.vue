@@ -1,45 +1,63 @@
 <template>
   <div class="home">
-    <h1>Welcome to the Game</h1>
+    <h1>Woordle</h1>
+
     <div class="buttons">
-      <router-link to="/play">
-        <button class="play-button">Play</button>
-      </router-link>
-      <router-link to="/highscores">
-        <button class="highscores-button">High Scores</button>
-      </router-link>
+      <button class="button play" @click="goToPlay">Play</button>
+      <button class="button highscores" @click="goToHighscores">Highscores</button>
     </div>
   </div>
 </template>
 
-<script lang="ts" >
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const goToPlay = () => {
+  router.push('/play');
+};
+
+const goToHighscores = () => {
+  router.push('/highscores');
+};
 </script>
 
 <style scoped>
 .home {
-  text-align: center;
-  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
 }
 
 .buttons {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-button {
-  padding: 10px 20px;
-  margin: 10px;
-  font-size: 16px;
+.button {
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
   cursor: pointer;
 }
 
-.play-button {
+.play {
   background-color: #4CAF50;
-  color: white;
 }
 
-.highscores-button {
-  background-color: #008CBA;
-  color: white;
+.highscores {
+  background-color: #2196F3;
 }
 </style>
-
