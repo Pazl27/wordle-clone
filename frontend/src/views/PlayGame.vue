@@ -29,6 +29,11 @@ const guesses = ref([
   ['', '', '', '', '']
 ]);
 
+let user = ref({
+  id: '',
+  word: '',
+})
+
 const activeGuessIndex = ref(0);
 
 const onLetterEntered = (index: number, letter: string) => {
@@ -46,11 +51,12 @@ const onLetterEntered = (index: number, letter: string) => {
   }
 };
 
-const onEnterPressed = () => {
+const onEnterPressed = async () => {
   const currentGuess = guesses.value[activeGuessIndex.value];
 
   if (!currentGuess.includes('')) {
-    console.log('Entered guess:', currentGuess.join(''));
+    const guess = currentGuess.join('').toLowerCase();
+    await makeGuess(guess);
 
     if (activeGuessIndex.value < guesses.value.length - 1) {
       activeGuessIndex.value += 1;
@@ -58,10 +64,24 @@ const onEnterPressed = () => {
   }
 };
 
+const makeGuess = async (guess: string) => {
+  const data = {
+    guess: guess,
+    id: user.id
+  }
+  try {
+    const response = await api.guessWord(data);
+    console.log(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const startGame = async () => {
   try {
     const response = await api.startGame();
-    console.log(response.data);
+    user = response.data;
+    console.log(user);
   } catch (error) {
     console.error(error);
   }
