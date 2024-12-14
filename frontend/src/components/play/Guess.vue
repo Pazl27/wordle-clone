@@ -6,6 +6,8 @@
       :letter="letter"
       :isActive="isActive && !letter"
       :index="index"
+      :rightPlace="rightPlace[index]"
+      :rightLetter="rightLetter[index]"
     />
   </div>
 </template>
@@ -21,6 +23,14 @@ const props = defineProps({
   },
   isActive: {
     type: Boolean,
+    required: true,
+  },
+    rightPlace: {
+    type: Array,
+    required: true,
+  },
+  rightLetter: {
+    type: Array,
     required: true,
   },
 });

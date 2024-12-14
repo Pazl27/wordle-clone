@@ -6,6 +6,8 @@
         :key="index"
         :letters="guess"
         :isActive="index === activeGuessIndex"
+        :rightPlace="guessesRightPlace[index]"
+        :rightLetter="guessesRightLetter[index]"
         @letterEntered="onLetterEntered(index, $event)"
         @enterPressed="onEnterPressed"
       />
@@ -19,20 +21,36 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import Guess from '../components/play/Guess.vue';
-import api from '../api/backend-api'
+import api from '../api/backend-api';
 
 const guesses = ref([
   ['', '', '', '', ''],
   ['', '', '', '', ''],
   ['', '', '', '', ''],
   ['', '', '', '', ''],
-  ['', '', '', '', '']
+  ['', '', '', '', ''],
+]);
+
+const guessesRightPlace = ref([
+  ['', '', '', '', ''],
+  ['', '', '', '', ''],
+  ['', '', '', '', ''],
+  ['', '', '', '', ''],
+  ['', '', '', '', ''],
+]);
+
+const guessesRightLetter = ref([
+  ['', '', '', '', ''],
+  ['', '', '', '', ''],
+  ['', '', '', '', ''],
+  ['', '', '', '', ''],
+  ['', '', '', '', ''],
 ]);
 
 let user = ref({
   id: '',
   word: '',
-})
+});
 
 const activeGuessIndex = ref(0);
 
@@ -56,10 +74,12 @@ const onEnterPressed = async () => {
 
   if (!currentGuess.includes('')) {
     const guess = currentGuess.join('').toLowerCase();
-    await makeGuess(guess);
+    const isValid = await makeGuess(guess);
 
-    if (activeGuessIndex.value < guesses.value.length - 1) {
+    if (isValid && activeGuessIndex.value < guesses.value.length - 1) {
       activeGuessIndex.value += 1;
+    } else if (!isValid) {
+      guesses.value[activeGuessIndex.value] = ['', '', '', '', ''];
     }
   }
 };
@@ -67,21 +87,45 @@ const onEnterPressed = async () => {
 const makeGuess = async (guess: string) => {
   const data = {
     guess: guess,
-    id: user.id
-  }
+    id: user.id,
+  };
   try {
     const response = await api.guessWord(data);
-    console.log(response.data);
+    const { valid_word, correct_word, in_word, right_place, attempts } = response.data;
+
+    if (valid_word == "Fail") {
+      return false;
+    }
+    if (attempts >= 5) {
+      //TODO: Pop up modal
+      alert("Game Over!");
+    }
+    if (correct_word == "Pass") {
+      //TODO: Pop up modal
+      alert("You win!");
+    }
+
+    for (const [index, char] of Object.entries(right_place)) {
+      guessesRightPlace.value[activeGuessIndex.value][index] = char;
+    }
+
+    for (const [index, char] of Object.entries(in_word)) {
+      guessesRightLetter.value[activeGuessIndex.value][index] = char;
+    }
+
   } catch (error) {
     console.error(error);
+    return false;
   }
+
+  return true;
 };
 
 const startGame = async () => {
   try {
     const response = await api.startGame();
     user = response.data;
-    console.log(user);
+    console.log("User: ", user);
   } catch (error) {
     console.error(error);
   }
