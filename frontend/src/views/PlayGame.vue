@@ -16,11 +16,16 @@
     <div class="keyboard">
     </div>
   </div>
+
+  <GameOver v-if="gameOver" />
+  <GameWon v-if="gameWon" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import Guess from '../components/play/Guess.vue';
+import GameOver from '../components/play/GameOver.vue';
+import GameWon from '../components/play/GameWon.vue';
 import api from '../api/backend-api';
 
 const guesses = ref([
@@ -53,6 +58,8 @@ let user = ref({
 });
 
 const activeGuessIndex = ref(0);
+const gameOver = ref(false);
+const gameWon = ref(false);
 
 const onLetterEntered = (index: number, letter: string) => {
   if (index < guesses.value.length) {
@@ -97,12 +104,10 @@ const makeGuess = async (guess: string) => {
       return false;
     }
     if (attempts >= 5) {
-      //TODO: Pop up modal
-      alert("Game Over!");
+      gmameOver.value = true;
     }
     if (correct_word == "Pass") {
-      //TODO: Pop up modal
-      alert("You win!");
+      gameWon.value = true;
     }
 
     for (const [index, char] of Object.entries(right_place)) {
