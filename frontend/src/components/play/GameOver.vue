@@ -20,6 +20,7 @@
           id="playerName"
           class="name-input"
           placeholder="Your name here"
+          @keydown.enter="setName"
         />
       </div>
 
@@ -63,7 +64,7 @@ const goToHighScores = () => {
 
 const getScore = async () => {
   try {
-    const response = await api.getScore(props.user.id); // Assuming API doesn't require user ID here
+    const response = await api.getScore(props.user.id);
     score.value = response.data;
   } catch (error) {
     console.error(error);
@@ -72,8 +73,23 @@ const getScore = async () => {
 
 const getWord = async () => {
   try {
-    const response = await api.getWord(props.user.id); // Assuming API doesn't require user ID here
+    const response = await api.getWord(props.user.id);
     word.value = response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+const setName = async () => {
+  if (!playerName.value) {
+    return
+  }
+
+  try {
+    await api.setName(props.user.id, playerName.value);
+
+    const inputField = document.getElementById('playerName') as HTMLInputElement;
+    inputField.blur();
   } catch (error) {
     console.error(error);
   }

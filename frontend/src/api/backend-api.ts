@@ -21,5 +21,8 @@ export default {
   },
   getScore(id: string) {
     return axiosApi.get(`/user/score/${id}`);
+  },
+  setName(id: string, name: string) {
+    return axiosApi.post(`/user/name/${id}`, name );
   }
 }
