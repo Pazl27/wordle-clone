@@ -32,6 +32,7 @@ struct GuessResponseDTO {
 struct UserDTO {
     id: Uuid,
     attempts: i32,
+    word: String
 }
 
 #[post("/api/start")]
@@ -45,6 +46,7 @@ async fn start_game() -> impl Responder {
                     let response = UserDTO {
                         id: user.id,
                         attempts: user.attempts,
+                        word: user.word
                     };
                     HttpResponse::Ok().json(response)
                 }
@@ -104,3 +106,20 @@ async fn get_users() -> impl Responder {
 
     HttpResponse::Ok().json(users)
 }
+
+#[get("/api/user/word/{id}")]
+async fn get_user_word(id: web::Path<Uuid>) -> impl Responder {
+    let pool = establish_connection().await.unwrap();
+    let user = get_user(&pool, id.into_inner()).await.unwrap();
+
+    HttpResponse::Ok().json(user.word)
+}
+
+#[get("/api/user/score/{id}")]
+async fn get_user_score(id: web::Path<Uuid>) -> impl Responder {
+    let pool = establish_connection().await.unwrap();
+    let user = get_user(&pool, id.into_inner()).await.unwrap();
+
+    HttpResponse::Ok().json(user.score)
+}
+

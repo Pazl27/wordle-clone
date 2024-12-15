@@ -15,5 +15,11 @@ export default {
   },
   getUsers() {
     return axiosApi.get('/users')
+  },
+  getWord(id: string) {
+    return axiosApi.get(`/user/word/${id}`);
+  },
+  getScore(id: string) {
+    return axiosApi.get(`/user/score/${id}`);
   }
 }

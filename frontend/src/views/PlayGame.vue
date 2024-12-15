@@ -5,7 +5,7 @@
         v-for="(guess, index) in guesses"
         :key="index"
         :letters="guess"
-        :isActive="index === activeGuessIndex"
+        :isActive="index === activeGuessIndex && (!gameOver && !gameWon)"
         :rightPlace="guessesRightPlace[index]"
         :rightLetter="guessesRightLetter[index]"
         @letterEntered="onLetterEntered(index, $event)"
@@ -17,8 +17,8 @@
     </div>
   </div>
 
-  <GameOver v-if="gameOver" />
-  <GameWon v-if="gameWon" />
+  <GameOver v-if="gameOver" :user />
+  <GameWon v-if="gameWon" :user />
 </template>
 
 <script setup lang="ts">
@@ -62,6 +62,10 @@ const gameOver = ref(false);
 const gameWon = ref(false);
 
 const onLetterEntered = (index: number, letter: string) => {
+  if (gameOver.value || gameWon.value) {
+    return;
+  }
+
   if (index < guesses.value.length) {
     const guess = guesses.value[index];
     const firstEmptySlot = guess.indexOf('');
@@ -77,8 +81,11 @@ const onLetterEntered = (index: number, letter: string) => {
 };
 
 const onEnterPressed = async () => {
-  const currentGuess = guesses.value[activeGuessIndex.value];
+  if (gameOver.value || gameWon.value) {
+    return;
+  }
 
+  const currentGuess = guesses.value[activeGuessIndex.value];
   if (!currentGuess.includes('')) {
     const guess = currentGuess.join('').toLowerCase();
     const isValid = await makeGuess(guess);
@@ -104,7 +111,7 @@ const makeGuess = async (guess: string) => {
       return false;
     }
     if (attempts >= 5) {
-      gmameOver.value = true;
+      gameOver.value = true;
     }
     if (correct_word == "Pass") {
       gameWon.value = true;

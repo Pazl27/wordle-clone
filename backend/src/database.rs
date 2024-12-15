@@ -8,6 +8,7 @@ use serde::Serialize;
     pub id: Uuid,
     pub word: String,
     pub attempts: i32,
+    pub score: i32,
 }
 
 pub async fn establish_connection() -> sqlx::Result<sqlx::PgPool> {
@@ -22,9 +23,10 @@ pub async fn create_user(pool: &sqlx::PgPool, word: &str) -> sqlx::Result<User> 
     let new_id = Uuid::new_v4();
     let user = sqlx::query_as!(
         User,
-        "INSERT INTO users (id, word, attempts) VALUES ($1, $2, $3) RETURNING id, word, attempts",
+        "INSERT INTO users (id, word, attempts, score) VALUES ($1, $2, $3, $4) RETURNING id, word, attempts, score",
         new_id,
         word,
+        0,
         0
     )
     .fetch_one(pool)
@@ -36,7 +38,7 @@ pub async fn create_user(pool: &sqlx::PgPool, word: &str) -> sqlx::Result<User> 
 pub async fn get_user(pool: &sqlx::PgPool, id: Uuid) -> sqlx::Result<User> {
     let user = sqlx::query_as!(
         User,
-        "SELECT id, word, attempts FROM users WHERE id = $1",
+        "SELECT id, word, attempts, score FROM users WHERE id = $1",
         id
     )
     .fetch_one(pool)
@@ -48,9 +50,10 @@ pub async fn get_user(pool: &sqlx::PgPool, id: Uuid) -> sqlx::Result<User> {
 pub async fn update_user(pool: &sqlx::PgPool, user: &User) -> sqlx::Result<User> {
     let updated_user = sqlx::query_as!(
         User,
-        "UPDATE users SET word = $1, attempts = $2 WHERE id = $3 RETURNING id, word, attempts",
+        "UPDATE users SET word = $1, attempts = $2, score = $3 WHERE id = $4 RETURNING id, word, attempts, score",
         user.word,
         user.attempts,
+        user.score,
         user.id
     )
     .fetch_one(pool)
@@ -62,7 +65,7 @@ pub async fn update_user(pool: &sqlx::PgPool, user: &User) -> sqlx::Result<User>
 pub async fn get_users(pool: &sqlx::PgPool) -> sqlx::Result<Vec<User>> {
     let users = sqlx::query_as!(
         User,
-        "SELECT id, word, attempts FROM users"
+        "SELECT id, word, attempts, score FROM users"
     )
     .fetch_all(pool)
     .await?;
