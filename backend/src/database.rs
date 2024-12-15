@@ -9,6 +9,7 @@ use serde::Serialize;
     pub word: String,
     pub attempts: i32,
     pub score: i32,
+    pub name: String,
 }
 
 pub async fn establish_connection() -> sqlx::Result<sqlx::PgPool> {
@@ -23,11 +24,12 @@ pub async fn create_user(pool: &sqlx::PgPool, word: &str) -> sqlx::Result<User> 
     let new_id = Uuid::new_v4();
     let user = sqlx::query_as!(
         User,
-        "INSERT INTO users (id, word, attempts, score) VALUES ($1, $2, $3, $4) RETURNING id, word, attempts, score",
+        "INSERT INTO users (id, word, attempts, score, name) VALUES ($1, $2, $3, $4, $5) RETURNING id, word, attempts, score, name",
         new_id,
         word,
         0,
-        0
+        0,
+        "unknown".to_string()
     )
     .fetch_one(pool)
     .await?;
@@ -38,7 +40,7 @@ pub async fn create_user(pool: &sqlx::PgPool, word: &str) -> sqlx::Result<User> 
 pub async fn get_user(pool: &sqlx::PgPool, id: Uuid) -> sqlx::Result<User> {
     let user = sqlx::query_as!(
         User,
-        "SELECT id, word, attempts, score FROM users WHERE id = $1",
+        "SELECT id, word, attempts, score, name FROM users WHERE id = $1",
         id
     )
     .fetch_one(pool)
@@ -50,10 +52,11 @@ pub async fn get_user(pool: &sqlx::PgPool, id: Uuid) -> sqlx::Result<User> {
 pub async fn update_user(pool: &sqlx::PgPool, user: &User) -> sqlx::Result<User> {
     let updated_user = sqlx::query_as!(
         User,
-        "UPDATE users SET word = $1, attempts = $2, score = $3 WHERE id = $4 RETURNING id, word, attempts, score",
+        "UPDATE users SET word = $1, attempts = $2, score = $3, name = $4 WHERE id = $5 RETURNING id, word, attempts, score, name",
         user.word,
         user.attempts,
         user.score,
+        user.name,
         user.id
     )
     .fetch_one(pool)
@@ -65,7 +68,7 @@ pub async fn update_user(pool: &sqlx::PgPool, user: &User) -> sqlx::Result<User>
 pub async fn get_users(pool: &sqlx::PgPool) -> sqlx::Result<Vec<User>> {
     let users = sqlx::query_as!(
         User,
-        "SELECT id, word, attempts, score FROM users"
+        "SELECT id, word, attempts, score, name FROM users"
     )
     .fetch_all(pool)
     .await?;

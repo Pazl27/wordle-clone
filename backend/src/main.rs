@@ -15,6 +15,7 @@ async fn main() -> std::io::Result<()> {
             .service(router::get_users)
             .service(router::get_user_word)
             .service(router::get_user_score)
+            .service(router::set_user_name)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

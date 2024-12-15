@@ -5,7 +5,7 @@ use uuid::Uuid;
 use std::collections::HashMap;
 
 use crate::word_provider::{get_word, is_word_in_list, find_same_letters, find_right_place, is_right_word }; 
-use crate::database::{establish_connection, create_user, get_user, update_user};
+use crate::database::{User, establish_connection, create_user, get_user, update_user};
 
 #[derive(Serialize)]
 pub enum Valid {
@@ -32,7 +32,42 @@ struct GuessResponseDTO {
 struct UserDTO {
     id: Uuid,
     attempts: i32,
-    word: String
+    word: String,
+    name: String,
+}
+
+impl GuessResponseDTO {
+    pub fn new(valid_word: Valid, correct_word: Valid, in_word: HashMap<i8, char>, right_place: HashMap<i8, char>, attempts: i32) -> GuessResponseDTO {
+        GuessResponseDTO {
+            valid_word,
+            correct_word,
+            in_word,
+            right_place,
+            attempts,
+        }
+    }
+}
+
+impl UserDTO {
+    // TODO: maybe don't clone
+    pub fn to_dto(user: &User) -> UserDTO {
+        UserDTO {
+            id: user.id,
+            attempts: user.attempts,
+            word: "".to_string(),
+            name: user.name.clone(),
+        }
+    }
+
+    // TODO: maybe don't clone
+    pub fn to_dto_with_word(user: &User) -> UserDTO {
+        UserDTO {
+            id: user.id,
+            attempts: user.attempts,
+            word: user.word.clone(),
+            name: user.name.clone(),
+        }
+    }
 }
 
 #[post("/api/start")]
@@ -43,11 +78,8 @@ async fn start_game() -> impl Responder {
         Ok(word) => {
             match create_user(&pool, &word).await {
                 Ok(user) => {
-                    let response = UserDTO {
-                        id: user.id,
-                        attempts: user.attempts,
-                        word: user.word
-                    };
+                    // TODO: change function to .to_dto()
+                    let response = UserDTO::to_dto_with_word(&user);
                     HttpResponse::Ok().json(response)
                 }
                 Err(_) => HttpResponse::InternalServerError().finish(),
@@ -68,13 +100,7 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
 
     match valid {
         Valid::Fail => {
-            let response = GuessResponseDTO {
-                valid_word: valid,
-                correct_word: correct,
-                in_word: HashMap::new(),
-                right_place: HashMap::new(),
-                attempts: user.attempts,
-            };
+            let response = GuessResponseDTO::new(valid, correct, HashMap::new(), HashMap::new(), user.attempts);
             return HttpResponse::Ok().json(response);
         }
         _ => {}
@@ -88,13 +114,7 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     user.attempts += 1;
     update_user(&pool, &user).await.unwrap();
 
-    let response = GuessResponseDTO {
-        valid_word: valid,
-        correct_word: correct,
-        in_word: contains_letters,
-        right_place: right_letters,
-        attempts: user.attempts,
-    };
+    let response = GuessResponseDTO::new(valid, correct, contains_letters, right_letters, user.attempts);
 
     HttpResponse::Ok().json(response)
 }
@@ -104,7 +124,9 @@ async fn get_users() -> impl Responder {
     let pool = establish_connection().await.unwrap();
     let users = crate::database::get_users(&pool).await.unwrap();
 
-    HttpResponse::Ok().json(users)
+    let response: Vec<UserDTO> = users.iter().map(|u| UserDTO::to_dto_with_word(u)).collect();
+
+    HttpResponse::Ok().json(response)
 }
 
 #[get("/api/user/word/{id}")]
@@ -123,3 +145,13 @@ async fn get_user_score(id: web::Path<Uuid>) -> impl Responder {
     HttpResponse::Ok().json(user.score)
 }
 
+#[post("/api/user/name/{id}")]
+async fn set_user_name(id: web::Path<Uuid>, name: web::Json<String>) -> impl Responder {
+    let pool = establish_connection().await.unwrap();
+    let mut user = get_user(&pool, id.into_inner()).await.unwrap();
+
+    user.name = name.clone();
+    update_user(&pool, &user).await.unwrap();
+
+    HttpResponse::Ok().json(name)
+}
