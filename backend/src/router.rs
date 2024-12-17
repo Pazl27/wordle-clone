@@ -76,7 +76,7 @@ async fn start_game() -> impl Responder {
 
     match get_word() {
         Ok(word) => {
-            match create_user(&pool, &word).await {
+            match create_user(&pool, &word.to_lowercase()).await {
                 Ok(user) => {
                     // TODO: change function to .to_dto()
                     let response = UserDTO::to_dto_with_word(&user);
@@ -95,7 +95,15 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     let mut user = get_user(&pool, dto.id).await.unwrap();
     let guess = dto.guess.clone();
 
-    let valid = is_word_in_list(&guess);
+    let url = format!("https://api.dictionaryapi.dev/api/v2/entries/en/{}", guess);
+    let response = reqwest::get(&url).await.expect("Failed to send request");
+
+    let valid = if response.status().is_success() {
+        Valid::Pass
+    } else {
+        Valid::Fail
+    };
+
     let correct = is_right_word(&user.word, &guess);
 
     match valid {
