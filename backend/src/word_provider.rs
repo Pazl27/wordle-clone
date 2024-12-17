@@ -52,11 +52,10 @@ pub fn find_same_letters(word: &str, guess: &str) -> HashMap<i8, char> {
 
             if *count < *letter_counts.get(&g_char).unwrap_or(&0) {
                 map.insert(i as i8, g_char);
-                *count += 1; // Increment the added count for this character
+                *count += 1; 
             }
         }
     }
-
     map
 }
 
