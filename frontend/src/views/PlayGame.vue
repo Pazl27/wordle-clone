@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <div class="gameBoard">
       <Guess
         v-for="(guess, index) in guesses"
@@ -13,8 +13,7 @@
       />
     </div>
 
-    <div class="keyboard">
-    </div>
+    <Keyboard></Keyboard>
   </div>
 
   <GameOver v-if="gameOver" :user />
@@ -26,6 +25,7 @@ import { ref, onMounted } from 'vue';
 import Guess from '../components/play/Guess.vue';
 import GameOver from '../components/play/GameOver.vue';
 import GameWon from '../components/play/GameWon.vue';
+import Keyboard from '../components/Keyboard.vue';
 import api from '../api/backend-api';
 
 const guesses = ref([
@@ -149,6 +149,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
 .gameBoard {
   display: flex;
   flex-direction: column;
