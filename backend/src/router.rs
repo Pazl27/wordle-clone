@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::collections::HashMap;
 
-use crate::word_provider::{get_word, is_word_in_list, find_same_letters, find_right_place, is_right_word }; 
+use crate::word_provider::{get_word, find_same_letters, find_right_place, is_right_word};
 use crate::database::{User, establish_connection, create_user, get_user, update_user};
 
 #[derive(Serialize)]
