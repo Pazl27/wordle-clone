@@ -1,8 +1,8 @@
 use rand::Rng;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use std::collections::HashMap;
 
 use crate::router::Valid;
 
@@ -52,7 +52,7 @@ pub fn find_same_letters(word: &str, guess: &str) -> HashMap<i8, char> {
 
             if *count < *letter_counts.get(&g_char).unwrap_or(&0) {
                 map.insert(i as i8, g_char);
-                *count += 1; 
+                *count += 1;
             }
         }
     }
@@ -65,7 +65,51 @@ pub fn find_right_place(word: &str, guess: &str) -> HashMap<i8, char> {
     for (i, g_char) in guess.chars().enumerate() {
         if word.chars().nth(i) == Some(g_char) {
             map.insert(i as i8, g_char);
-        } 
+        }
     }
     map
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_random_word() {
+        let words = vec!["test".to_string(), "test".to_string()];
+        let word = get_random_word(words);
+        assert_eq!(word, "test".to_string());
+    }
+
+    #[test]
+    fn test_is_right_word() {
+        let word = "test";
+        let guess = "test";
+        let result = is_right_word(word, guess);
+        assert_eq!(result, Valid::Pass);
+    }
+
+    #[test]
+    fn test_find_same_letters() {
+        let word = "test";
+        let guess = "tset";
+        let result = find_same_letters(word, guess);
+        let mut map = HashMap::new();
+        map.insert(0, 't');
+        map.insert(1, 's');
+        map.insert(2, 'e');
+        map.insert(3, 't');
+        assert_eq!(result, map);
+    }
+
+    #[test]
+    fn test_find_right_place() {
+        let word = "test";
+        let guess = "tset";
+        let result = find_right_place(word, guess);
+        let mut map = HashMap::new();
+        map.insert(0, 't');
+        map.insert(3, 't');
+        assert_eq!(result, map);
+    }
 }

@@ -1,9 +1,9 @@
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;
 
+mod database;
 mod router;
 pub mod word_provider;
-mod database;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

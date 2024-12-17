@@ -15,7 +15,22 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { defineProps, ref } from 'vue';
+
+const props = defineProps({
+  guesses: {
+    type: Array,
+    required: true,
+  },
+  guessesRightPlace: {
+    type: Array,
+    required: true,
+  },
+  guessesRightLetter: {
+    type: Array,
+    required: true,
+  },
+})
 
 const keyboardLayout: string[][] = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -26,7 +41,6 @@ const keyboardLayout: string[][] = [
 const activeKey = ref<string | null>(null);
 
 const keyClicked = (key: string) => {
-  console.log(key);
   simulateHapticFeedback(key);
 };
 

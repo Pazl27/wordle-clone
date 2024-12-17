@@ -1,13 +1,13 @@
-use actix_web::{get, post, HttpResponse, Responder};
 use actix_web::web;
+use actix_web::{get, post, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use std::collections::HashMap;
+use uuid::Uuid;
 
-use crate::word_provider::{get_word, find_same_letters, find_right_place, is_right_word};
-use crate::database::{User, establish_connection, create_user, get_user, update_user};
+use crate::database::{create_user, establish_connection, get_user, update_user, User};
+use crate::word_provider::{find_right_place, find_same_letters, get_word, is_right_word};
 
-#[derive(Serialize)]
+#[derive(PartialEq, Debug, Serialize)]
 pub enum Valid {
     Pass,
     Fail,
@@ -37,7 +37,13 @@ struct UserDTO {
 }
 
 impl GuessResponseDTO {
-    pub fn new(valid_word: Valid, correct_word: Valid, in_word: HashMap<i8, char>, right_place: HashMap<i8, char>, attempts: i32) -> GuessResponseDTO {
+    pub fn new(
+        valid_word: Valid,
+        correct_word: Valid,
+        in_word: HashMap<i8, char>,
+        right_place: HashMap<i8, char>,
+        attempts: i32,
+    ) -> GuessResponseDTO {
         GuessResponseDTO {
             valid_word,
             correct_word,
@@ -108,7 +114,13 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
 
     match valid {
         Valid::Fail => {
-            let response = GuessResponseDTO::new(valid, correct, HashMap::new(), HashMap::new(), user.attempts);
+            let response = GuessResponseDTO::new(
+                valid,
+                correct,
+                HashMap::new(),
+                HashMap::new(),
+                user.attempts,
+            );
             return HttpResponse::Ok().json(response);
         }
         _ => {}
@@ -122,7 +134,13 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     user.attempts += 1;
     update_user(&pool, &user).await.unwrap();
 
-    let response = GuessResponseDTO::new(valid, correct, contains_letters, right_letters, user.attempts);
+    let response = GuessResponseDTO::new(
+        valid,
+        correct,
+        contains_letters,
+        right_letters,
+        user.attempts,
+    );
 
     HttpResponse::Ok().json(response)
 }

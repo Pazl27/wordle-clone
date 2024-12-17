@@ -13,7 +13,11 @@
       />
     </div>
 
-    <Keyboard></Keyboard>
+    <Keyboard
+      :guesses="guesses"
+      :guessesRightPlace="guessesRightPlace"
+      :guessesRightLetter="guessesRightLetter"
+    ></Keyboard>
   </div>
 
   <GameOver v-if="gameOver" :user />
