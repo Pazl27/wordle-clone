@@ -112,4 +112,29 @@ mod tests {
         map.insert(3, 't');
         assert_eq!(result, map);
     }
+
+    #[test]
+    fn test_edge_case_find_same_letters1() {
+        let word = "test";
+        let guess = "tett";
+        let result = find_same_letters(word, guess);
+        let mut map = HashMap::new();
+        map.insert(2, 't');
+        map.insert(0, 't');
+        map.insert(1, 'e');
+
+        assert_eq!(result, map);
+    }
+
+    #[test]
+    fn test_edge_case_find_same_letters2() {
+        let word = "dance";
+        let guess = "teddy";
+        let result = find_same_letters(word, guess);
+        let mut map = HashMap::new();
+        map.insert(1, 'e');
+        map.insert(2, 'd');
+
+        assert_eq!(result, map);
+    }
 }
