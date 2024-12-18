@@ -56,7 +56,6 @@ impl GuessResponseDTO {
 }
 
 impl UserDTO {
-    // TODO: maybe don't clone
     pub fn to_dto(user: &User) -> UserDTO {
         UserDTO {
             id: user.id,
@@ -66,7 +65,6 @@ impl UserDTO {
         }
     }
 
-    // TODO: maybe don't clone
     pub fn to_dto_with_word(user: &User) -> UserDTO {
         UserDTO {
             id: user.id,
@@ -141,7 +139,7 @@ async fn get_users() -> impl Responder {
     let pool = establish_connection().await.unwrap();
     let users = crate::services::database::get_users(&pool).await.unwrap();
 
-    let response: Vec<UserDTO> = users.iter().map(|u| UserDTO::to_dto_with_word(u)).collect();
+    let response: Vec<UserDTO> = users.iter().map(UserDTO::to_dto_with_word).collect();
 
     HttpResponse::Ok().json(response)
 }
