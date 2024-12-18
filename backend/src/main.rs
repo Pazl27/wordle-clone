@@ -1,8 +1,8 @@
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;
 
-mod database;
 mod router;
+pub mod services;
 pub mod word_provider;
 
 #[actix_web::main]

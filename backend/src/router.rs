@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::database::{create_user, establish_connection, get_user, update_user, User};
+use crate::services::database::{create_user, establish_connection, get_user, update_user, User};
+use crate::services::extern_api::valid_word;
 use crate::word_provider::{find_right_place, find_same_letters, get_word, is_right_word};
 
 #[derive(PartialEq, Debug, Serialize)]
@@ -101,29 +102,19 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     let mut user = get_user(&pool, dto.id).await.unwrap();
     let guess = dto.guess.clone();
 
-    let url = format!("https://api.dictionaryapi.dev/api/v2/entries/en/{}", guess);
-    let response = reqwest::get(&url).await.expect("Failed to send request");
-
-    let valid = if response.status().is_success() {
-        Valid::Pass
-    } else {
-        Valid::Fail
-    };
+    let valid = valid_word(&guess).await;
 
     let correct = is_right_word(&user.word, &guess);
 
-    match valid {
-        Valid::Fail => {
-            let response = GuessResponseDTO::new(
-                valid,
-                correct,
-                HashMap::new(),
-                HashMap::new(),
-                user.attempts,
-            );
-            return HttpResponse::Ok().json(response);
-        }
-        _ => {}
+    if Valid::Fail == valid {
+        let response = GuessResponseDTO::new(
+            valid,
+            correct,
+            HashMap::new(),
+            HashMap::new(),
+            user.attempts,
+        );
+        return HttpResponse::Ok().json(response);
     }
 
     let word = user.word.clone();
@@ -148,7 +139,7 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
 #[get("/api/users")]
 async fn get_users() -> impl Responder {
     let pool = establish_connection().await.unwrap();
-    let users = crate::database::get_users(&pool).await.unwrap();
+    let users = crate::services::database::get_users(&pool).await.unwrap();
 
     let response: Vec<UserDTO> = users.iter().map(|u| UserDTO::to_dto_with_word(u)).collect();
 
