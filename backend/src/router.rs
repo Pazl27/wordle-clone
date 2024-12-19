@@ -6,7 +6,9 @@ use uuid::Uuid;
 
 use crate::services::database::{create_user, establish_connection, get_user, update_user, User};
 use crate::services::extern_api::valid_word;
-use crate::word_provider::{find_right_place, find_same_letters, get_word, is_right_word};
+use crate::word_provider::{
+    find_not_containe, find_right_place, find_same_letters, get_word, is_right_word,
+};
 
 #[derive(PartialEq, Debug, Serialize)]
 pub enum Valid {
@@ -27,6 +29,7 @@ struct GuessResponseDTO {
     in_word: HashMap<i8, char>,
     right_place: HashMap<i8, char>,
     attempts: i32,
+    not_in_word: Vec<char>,
 }
 
 #[derive(Serialize)]
@@ -44,6 +47,7 @@ impl GuessResponseDTO {
         in_word: HashMap<i8, char>,
         right_place: HashMap<i8, char>,
         attempts: i32,
+        not_in_word: Vec<char>,
     ) -> GuessResponseDTO {
         GuessResponseDTO {
             valid_word,
@@ -51,6 +55,7 @@ impl GuessResponseDTO {
             in_word,
             right_place,
             attempts,
+            not_in_word,
         }
     }
 }
@@ -111,6 +116,7 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
             HashMap::new(),
             HashMap::new(),
             user.attempts,
+            Vec::new(),
         );
         return HttpResponse::Ok().json(response);
     }
@@ -119,6 +125,7 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
 
     let contains_letters = find_same_letters(&word, &guess);
     let right_letters = find_right_place(&word, &guess);
+    let not_in_word = find_not_containe(&word, &guess);
 
     user.attempts += 1;
     update_user(&pool, &user).await.unwrap();
@@ -129,6 +136,7 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
         contains_letters,
         right_letters,
         user.attempts,
+        not_in_word,
     );
 
     HttpResponse::Ok().json(response)

@@ -70,6 +70,10 @@ pub fn find_right_place(word: &str, guess: &str) -> HashMap<i8, char> {
     map
 }
 
+pub fn find_not_containe(word: &str, guess: &str) -> Vec<char> {
+    guess.chars().filter(|c| !word.contains(*c)).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -136,5 +140,17 @@ mod tests {
         map.insert(2, 'd');
 
         assert_eq!(result, map);
+    }
+
+    #[test]
+    fn test_find_not_containe() {
+        let word = "test";
+        let guess = "teddy";
+        let result = find_not_containe(word, guess);
+        let mut vec = Vec::new();
+        vec.push('d');
+        vec.push('d');
+        vec.push('y');
+        assert_eq!(result, vec);
     }
 }

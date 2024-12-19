@@ -14,9 +14,7 @@
     </div>
 
     <Keyboard
-      :guesses="guesses"
-      :guessesRightPlace="guessesRightPlace"
-      :guessesRightLetter="guessesRightLetter"
+      :doesNotContain="doesNotContain"
     ></Keyboard>
   </div>
 
@@ -55,6 +53,8 @@ const guessesRightLetter = ref([
   ['', '', '', '', ''],
   ['', '', '', '', ''],
 ]);
+
+const doesNotContain = ref([]);
 
 let user = ref({
   id: '',
@@ -109,7 +109,7 @@ const makeGuess = async (guess: string) => {
   };
   try {
     const response = await api.guessWord(data);
-    const { valid_word, correct_word, in_word, right_place, attempts } = response.data;
+    const { valid_word, correct_word, in_word, right_place, attempts, not_in_word } = response.data;
 
     if (valid_word == "Fail") {
       return false;
@@ -128,6 +128,8 @@ const makeGuess = async (guess: string) => {
     for (const [index, char] of Object.entries(in_word)) {
       guessesRightLetter.value[activeGuessIndex.value][index] = char;
     }
+
+    doesNotContain.value.push(not_in_word);
 
   } catch (error) {
     console.error(error);

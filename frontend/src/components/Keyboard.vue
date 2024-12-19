@@ -7,6 +7,7 @@
         class="key"
         :id="key"
         @click="keyClicked(key)"
+        :class="{ 'grayedOut': isKeyInDoesNotContain(key).value }"
       >
         {{ key }}
       </button>
@@ -15,21 +16,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
+import { defineProps, ref, computed } from 'vue';
 
 const props = defineProps({
-  guesses: {
+  doesNotContain: {
     type: Array,
     required: true,
-  },
-  guessesRightPlace: {
-    type: Array,
-    required: true,
-  },
-  guessesRightLetter: {
-    type: Array,
-    required: true,
-  },
+  }
 })
 
 const keyboardLayout: string[][] = [
@@ -39,6 +32,12 @@ const keyboardLayout: string[][] = [
 ];
 
 const activeKey = ref<string | null>(null);
+
+const isKeyInDoesNotContain = (key) => {
+  return computed(() => {
+    return props.doesNotContain.some(array => array.includes(key.toLowerCase()));
+  });
+};
 
 const keyClicked = (key: string) => {
   simulateHapticFeedback(key);
@@ -97,6 +96,10 @@ window.addEventListener('keydown', onKeydown);
 
 .key:active {
   background-color: #ddd;
+}
+.grayedOut {
+  background-color: #d3d3d3; /* Light gray background */
+  color: #a9a9a9; /* Dark gray text */
 }
 </style>
 
