@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::services::database::{create_user, establish_connection, get_user, update_user, User};
 use crate::services::extern_api::valid_word;
 use crate::word_provider::{
-    find_not_containe, find_right_place, find_same_letters, get_word, is_right_word,
+    find_not_containe, find_right_place, find_same_letters, get_word, is_right_word, remove_duplicates
 };
 
 #[derive(PartialEq, Debug, Serialize)]
@@ -123,8 +123,9 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
 
     let word = user.word.clone();
 
-    let contains_letters = find_same_letters(&word, &guess);
+    let mut contains_letters = find_same_letters(&word, &guess);
     let right_letters = find_right_place(&word, &guess);
+    remove_duplicates(&mut contains_letters, &word);
     let not_in_word = find_not_containe(&word, &guess);
 
     user.attempts += 1;
