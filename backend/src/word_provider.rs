@@ -58,6 +58,7 @@ pub fn find_right_place(word: &str, guess: &str) -> HashMap<i8, char> {
     map
 }
 
+//TODO: refactor this function
 pub fn remove_duplicates(same_letters: &mut HashMap<i8, char>, word: &str) {
     let mut occurences = HashMap::<char, i8>::new();
 
