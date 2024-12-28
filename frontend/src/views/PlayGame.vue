@@ -143,7 +143,6 @@ const startGame = async () => {
   try {
     const response = await api.startGame();
     user = response.data;
-    console.log("User: ", user);
   } catch (error) {
     console.error(error);
   }

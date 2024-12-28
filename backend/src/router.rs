@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::services::database::{create_user, establish_connection, get_user, update_user, User};
+use crate::services::database::{create_user, establish_connection, get_user, update_user, save_timestamp, User};
 use crate::services::extern_api::valid_word;
 use crate::word_provider::{
     find_not_containe, find_right_place, find_same_letters, get_word, is_right_word, remove_duplicates
@@ -93,7 +93,7 @@ async fn start_game() -> impl Responder {
             match create_user(&pool, &word.to_lowercase()).await {
                 Ok(user) => {
                     // TODO: change function to .to_dto()
-                    let response = UserDTO::to_dto_with_word(&user);
+                    let response = UserDTO::to_dto(&user);
                     HttpResponse::Ok().json(response)
                 }
                 Err(_) => HttpResponse::InternalServerError().finish(),
@@ -140,6 +140,11 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     score::adjust_score_by_guess(&mut user, &contains_letters, &right_letters);
     score::correct_guess(&mut user, &correct);
     update_user(&pool, &user).await.unwrap();
+
+    if correct == Valid::Pass {
+        save_timestamp(&pool, user.id).await.unwrap();
+        score::timestamp_score(&mut user).await;
+    }
 
     let response = GuessResponseDTO::new(
         valid,

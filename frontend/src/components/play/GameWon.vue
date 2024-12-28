@@ -21,6 +21,7 @@
           class="name-input"
           placeholder="Your name here"
           @keydown.enter="setName"
+          @blur="setName"
         />
       </div>
 

@@ -31,7 +31,6 @@ const getUsers = async () => {
   try {
     const response = await api.getUsers()
     users.value = response.data
-    console.log(users.value)
   } catch (error) {
     console.error(error)
   }

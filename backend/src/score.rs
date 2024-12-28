@@ -4,6 +4,9 @@ use crate::router::Valid;
 
 pub fn adjust_score_by_attempt(user: &mut database::User) {
     user.attempts += 1;
+    if user.attempts <= 1 {
+        return;
+    }
     user.score -= 200;
 }
 
@@ -21,8 +24,29 @@ pub fn correct_guess(user: &mut database::User, correct_word: &Valid) {
 
 pub async fn get_users() -> Vec<database::User> {
     let pool = database::establish_connection().await.unwrap();
-    let users = database::get_users(&pool).await.unwrap();
-    users
+    database::get_users(&pool).await.unwrap()
+}
+
+pub async fn timestamp_score(user: &mut database::User) {
+    let pool = database::establish_connection().await.unwrap();
+    match database::get_duration(&pool, &user.id).await {
+        Ok(Some(diff)) => {
+            let base_score = 100;
+            let base_time = 120;
+
+            let new_score = base_score * (base_time / diff);
+
+            user.score += new_score as i32;
+
+            let _ = database::update_user(&pool, user).await;
+        }
+        Ok(None) => {
+            println!("No duration found");
+        }
+        Err(e) => {
+            eprintln!("Error getting duration: {}", e);
+        }
+    }
 }
 
 #[cfg(test)]

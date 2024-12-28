@@ -3,5 +3,8 @@ CREATE TABLE IF NOT EXISTS users (
     attempts INTEGER NOT NULL DEFAULT 0,
     word TEXT NOT NULL,
     score INTEGER NOT NULL DEFAULT 0,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_time TIMESTAMP
 );
+

@@ -24,7 +24,7 @@ pub async fn create_user(pool: &sqlx::PgPool, word: &str) -> sqlx::Result<User> 
     let new_id = Uuid::new_v4();
     let user = sqlx::query_as!(
         User,
-        "INSERT INTO users (id, word, attempts, score, name) VALUES ($1, $2, $3, $4, $5) RETURNING id, word, attempts, score, name",
+        "INSERT INTO users (id, word, attempts, score, name, start_time) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING id, word, attempts, score, name",
         new_id,
         word,
         0,
@@ -74,6 +74,28 @@ pub async fn get_users(pool: &sqlx::PgPool) -> sqlx::Result<Vec<User>> {
     .await?;
 
     Ok(users)
+}
+
+pub async fn save_timestamp(pool: &sqlx::PgPool, user_id: Uuid) -> sqlx::Result<()> {
+    sqlx::query!(
+        "UPDATE users SET end_time = NOW() WHERE id = $1",
+        user_id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn get_duration(pool: &sqlx::PgPool, user_id: &Uuid) -> sqlx::Result<Option<i64>> {
+    let result = sqlx::query!(
+        "SELECT EXTRACT(EPOCH FROM (end_time - start_time)) as duration FROM users WHERE id = $1",
+        user_id
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(result.duration.map(|d| d as i64))
 }
 
 #[cfg(test)]
@@ -207,7 +229,6 @@ mod tests {
         let container_port = ContainerPort::from(5432);
         let container = GenericImage::new("postgres", "latest")
             .with_exposed_port(container_port)
-            .with_env_var("POSTGRES_DB", "postgres")
             .with_env_var("POSTGRES_USER", "postgres")
             .with_env_var("POSTGRES_HOST_AUTH_METHOD", "trust")
             .start()
