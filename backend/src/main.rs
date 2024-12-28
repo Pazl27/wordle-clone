@@ -2,8 +2,9 @@ use actix_web::{App, HttpServer};
 use dotenv::dotenv;
 
 mod router;
-pub mod services;
-pub mod word_provider;
+mod services;
+mod word_provider;
+mod score;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

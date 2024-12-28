@@ -9,6 +9,7 @@ use crate::services::extern_api::valid_word;
 use crate::word_provider::{
     find_not_containe, find_right_place, find_same_letters, get_word, is_right_word, remove_duplicates
 };
+use crate::score;
 
 #[derive(PartialEq, Debug, Serialize)]
 pub enum Valid {
@@ -38,6 +39,7 @@ struct UserDTO {
     attempts: i32,
     word: String,
     name: String,
+    score: i32,
 }
 
 impl GuessResponseDTO {
@@ -67,6 +69,7 @@ impl UserDTO {
             attempts: user.attempts,
             word: "".to_string(),
             name: user.name.clone(),
+            score: user.score,
         }
     }
 
@@ -76,6 +79,7 @@ impl UserDTO {
             attempts: user.attempts,
             word: user.word.clone(),
             name: user.name.clone(),
+            score: user.score,
         }
     }
 }
@@ -105,9 +109,13 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     let mut user = get_user(&pool, dto.id).await.unwrap();
     let guess = dto.guess.clone();
 
-    let valid = valid_word(&guess).await;
+    let mut valid = valid_word(&guess).await;
 
     let correct = is_right_word(&user.word, &guess);
+
+    if user.attempts >= 6 {
+        valid = Valid::Fail;
+    }
 
     if Valid::Fail == valid {
         let response = GuessResponseDTO::new(
@@ -128,7 +136,9 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
     remove_duplicates(&mut contains_letters, &word);
     let not_in_word = find_not_containe(&word, &guess);
 
-    user.attempts += 1;
+    score::adjust_score_by_attempt(&mut user);
+    score::adjust_score_by_guess(&mut user, &contains_letters, &right_letters);
+    score::correct_guess(&mut user, &correct);
     update_user(&pool, &user).await.unwrap();
 
     let response = GuessResponseDTO::new(
@@ -145,9 +155,7 @@ async fn guess(dto: web::Json<GuessDTO>) -> impl Responder {
 
 #[get("/api/users")]
 async fn get_users() -> impl Responder {
-    let pool = establish_connection().await.unwrap();
-    let users = crate::services::database::get_users(&pool).await.unwrap();
-
+    let users = score::get_users().await;
     let response: Vec<UserDTO> = users.iter().map(UserDTO::to_dto_with_word).collect();
 
     HttpResponse::Ok().json(response)

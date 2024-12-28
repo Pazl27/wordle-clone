@@ -67,7 +67,6 @@ pub fn remove_duplicates(same_letters: &mut HashMap<i8, char>, word: &str) {
     }
 
     for (key, value) in occurences.iter() {
-
         if *value > 1 {
             let mut count = 0;
             for c in word.chars() {
@@ -87,7 +86,7 @@ pub fn remove_duplicates(same_letters: &mut HashMap<i8, char>, word: &str) {
                 // find the indexes of the letter which are in the correct place in the word
                 let mut remove_keys: Vec<i8> = Vec::new();
                 for (key_2, value_2) in same_letters.iter() {
-                    // this should also equal to the key 
+                    // this should also equal to the key
                     let char = word.chars().nth(*key_2 as usize);
                     if char == Some(*value_2) && char == Some(*key) {
                         occurence_guess -= 1;
@@ -117,7 +116,8 @@ pub fn remove_duplicates(same_letters: &mut HashMap<i8, char>, word: &str) {
         }
     }
 
-    let keys_to_remove: Vec<i8> = same_letters.iter()
+    let keys_to_remove: Vec<i8> = same_letters
+        .iter()
         .filter_map(|(&key, &value)| {
             if (key as usize) < word.len() && word.chars().nth(key as usize) == Some(value) {
                 Some(key)
@@ -219,7 +219,7 @@ mod tests {
 
     #[test]
     fn test_remove_duplicates4() {
-        let word =  "yayayay";
+        let word = "yayayay";
         let guess = "ayayyay";
         let mut result = find_same_letters(word, guess);
         remove_duplicates(&mut result, word);
@@ -234,7 +234,7 @@ mod tests {
 
     #[test]
     fn test_remove_duplicates5() {
-        let word =  "taat";
+        let word = "taat";
         let guess = "atta";
         let mut result = find_same_letters(word, guess);
         remove_duplicates(&mut result, word);
@@ -249,7 +249,7 @@ mod tests {
 
     #[test]
     fn test_remove_duplicates6() {
-        let word =  "taatz";
+        let word = "taatz";
         let guess = "attaa";
         let mut result = find_same_letters(word, guess);
         remove_duplicates(&mut result, word);

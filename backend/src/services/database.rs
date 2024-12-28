@@ -28,7 +28,7 @@ pub async fn create_user(pool: &sqlx::PgPool, word: &str) -> sqlx::Result<User> 
         new_id,
         word,
         0,
-        0,
+        1000,
         "unknown".to_string()
     )
     .fetch_one(pool)
@@ -66,9 +66,12 @@ pub async fn update_user(pool: &sqlx::PgPool, user: &User) -> sqlx::Result<User>
 }
 
 pub async fn get_users(pool: &sqlx::PgPool) -> sqlx::Result<Vec<User>> {
-    let users = sqlx::query_as!(User, "SELECT id, word, attempts, score, name FROM users")
-        .fetch_all(pool)
-        .await?;
+    let users = sqlx::query_as!(
+        User,
+        "SELECT id, word, attempts, score, name FROM users ORDER BY score DESC LIMIT 100"
+    )
+    .fetch_all(pool)
+    .await?;
 
     Ok(users)
 }
@@ -230,11 +233,13 @@ mod tests {
             .await
             .unwrap();
 
+        for _ in 0..101 {
+            let _ = create_user(&pool, "test").await.unwrap();
+        }
         let _ = create_user(&pool, "test").await.unwrap();
-        let _ = create_user(&pool, "test2").await.unwrap();
 
         let users = get_users(&pool).await.unwrap();
 
-        assert_eq!(users.len(), 2);
+        assert_eq!(users.len(), 100);
     }
 }
