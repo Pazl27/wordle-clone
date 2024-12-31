@@ -25,6 +25,13 @@
         />
       </div>
 
+      <div class="playerList">
+        <ShortList
+          :user="props.user"
+          :key="reload"
+        ></ShortList>
+      </div>
+
       <div class="button-container">
         <button @click="goToHomePage" class="home-btn">Go to Homepage</button>
         <button @click="goToHighScores" class="highscores-btn">View Highscores</button>
@@ -37,6 +44,7 @@
 import { ref, defineProps, onMounted } from 'vue';
 import api from '../../api/backend-api';
 import { useRouter } from 'vue-router';
+import ShortList from '../highscore/ShortList.vue';
 
 const props = defineProps({
   user: { type: Object, required: true },
@@ -46,6 +54,7 @@ const showModal = ref(true);
 const score = ref(0);
 const word = ref('');
 const playerName = ref('');
+const reload = ref(0);
 
 const router = useRouter();
 
@@ -88,6 +97,8 @@ const setName = async () => {
 
   try {
     await api.setName(props.user.id, playerName.value);
+
+    reload.value += 1;
 
     const inputField = document.getElementById('playerName') as HTMLInputElement;
     inputField.blur();
@@ -218,5 +229,11 @@ button:hover {
 
 button:focus {
   outline: none;
+}
+
+.playerList {
+  border-radius: 5px;
+  border: 2px solid white;
+
 }
 </style>

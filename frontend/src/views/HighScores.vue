@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import ScoreEntry from '../components/ScoreEntry.vue'
+import ScoreEntry from '../components/highscore/ScoreEntry.vue'
 import api from '../api/backend-api'
 import { ref, onMounted } from 'vue'
 
