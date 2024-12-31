@@ -133,7 +133,7 @@ mod tests {
 
         let pool = connection.expect("Failed to create pool.");
 
-        sqlx::query("CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, word TEXT, attempts INT, score INT, name TEXT)")
+        sqlx::query("CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, word TEXT, attempts INT, score INT, name TEXT, start_time TIMESTAMP, end_time TIMESTAMP)")
             .execute(&pool)
             .await
             .unwrap();
@@ -169,7 +169,7 @@ mod tests {
 
         let pool = connection.expect("Failed to create pool.");
 
-        sqlx::query("CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, word TEXT, attempts INT, score INT, name TEXT)")
+        sqlx::query("CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, word TEXT, attempts INT, score INT, name TEXT, start_time TIMESTAMP, end_time TIMESTAMP)")
             .execute(&pool)
             .await
             .unwrap();
@@ -208,7 +208,7 @@ mod tests {
 
         let pool = connection.expect("Failed to create pool.");
 
-        sqlx::query("CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, word TEXT, attempts INT, score INT, name TEXT)")
+        sqlx::query("CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, word TEXT, attempts INT, score INT, name TEXT, start_time TIMESTAMP, end_time TIMESTAMP)")
             .execute(&pool)
             .await
             .unwrap();
@@ -249,7 +249,7 @@ mod tests {
 
         let pool = connection.expect("Failed to create pool.");
 
-        sqlx::query("CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, word TEXT, attempts INT, score INT, name TEXT)")
+        sqlx::query("CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY, word TEXT, attempts INT, score INT, name TEXT, start_time TIMESTAMP, end_time TIMESTAMP)")
             .execute(&pool)
             .await
             .unwrap();

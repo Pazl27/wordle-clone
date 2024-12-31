@@ -63,11 +63,11 @@ mod test {
             id: uuid::Uuid::new_v4(),
             name: "Test".to_string(),
             score: 1000,
-            attempts: 0,
+            attempts: 1,
             word: "test".to_string(),
         };
         adjust_score_by_attempt(&mut user);
-        assert_eq!(user.attempts, 1);
+        assert_eq!(user.attempts, 2);
         assert_eq!(user.score, 800);
     }
 
