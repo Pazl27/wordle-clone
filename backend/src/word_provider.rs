@@ -261,4 +261,19 @@ mod tests {
 
         assert_eq!(result, map);
     }
+
+    // TODO: fix this so that it works
+    #[test]
+    fn test_remove_duplicates7() {
+        let word = "craze";
+        let guess = "eater";
+        let mut result = find_same_letters(word, guess);
+        remove_duplicates(&mut result, word);
+        let mut map = HashMap::new();
+        map.insert(0, 'e');
+        map.insert(1, 'a');
+        map.insert(4, 'r');
+
+        assert_eq!(result, map);
+    }
 }
