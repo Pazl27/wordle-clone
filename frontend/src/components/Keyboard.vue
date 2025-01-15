@@ -7,7 +7,7 @@
         class="key"
         :id="key"
         @click="keyClicked(key)"
-        :class="{ 'grayedOut': isKeyInDoesNotContain(key).value }"
+        :class="{ grayedOut: isKeyInDoesNotContain(key).value }"
       >
         {{ key }}
       </button>
@@ -16,50 +16,50 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, computed } from 'vue';
+import { defineProps, ref, computed } from 'vue'
 
 const props = defineProps({
   doesNotContain: {
     type: Array,
     required: true,
-  }
+  },
 })
 
 const keyboardLayout: string[][] = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-  ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-];
+  ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
+]
 
-const activeKey = ref<string | null>(null);
+const activeKey = ref<string | null>(null)
 
-const isKeyInDoesNotContain = (key) => {
+const isKeyInDoesNotContain = (key: string) => {
   return computed(() => {
-    return props.doesNotContain.some(array => array.includes(key.toLowerCase()));
-  });
-};
+    return props.doesNotContain.some((array) => array.includes(key.toLowerCase()))
+  })
+}
 
 const keyClicked = (key: string) => {
-  simulateHapticFeedback(key);
-};
+  simulateHapticFeedback(key)
+}
 
 const simulateHapticFeedback = (key: string) => {
-  const button = document.getElementById(key);
+  const button = document.getElementById(key)
   if (button) {
-    button.classList.add('pressed');
+    button.classList.add('pressed')
     setTimeout(() => {
-      button.classList.remove('pressed');
-    }, 200);
-  }
-};
-
-const onKeydown = (event: KeyboardEvent) => {
-  if (keyboardLayout.flat().includes(event.key.toUpperCase())) {
-    simulateHapticFeedback(event.key.toUpperCase());
+      button.classList.remove('pressed')
+    }, 200)
   }
 }
 
-window.addEventListener('keydown', onKeydown);
+const onKeydown = (event: KeyboardEvent) => {
+  if (keyboardLayout.flat().includes(event.key.toUpperCase())) {
+    simulateHapticFeedback(event.key.toUpperCase())
+  }
+}
+
+window.addEventListener('keydown', onKeydown)
 </script>
 
 <style scoped>
@@ -102,4 +102,3 @@ window.addEventListener('keydown', onKeydown);
   color: #a9a9a9; /* Dark gray text */
 }
 </style>
-
